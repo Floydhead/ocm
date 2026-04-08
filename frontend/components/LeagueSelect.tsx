@@ -1,18 +1,29 @@
 import { useQuery } from "@tanstack/react-query"
 import { useApi } from "../hooks/useApi"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-export default function LeagueSelect({ onLeagueSelect }: { onLeagueSelect?: (id: number) => void }) {
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+interface LeagueSelectProps {
+  selectedId?: number | null
+  onLeagueSelect?: (id: number) => void
+}
+
+export default function LeagueSelect({ selectedId = null, onLeagueSelect }: LeagueSelectProps) {
+  const [currentId, setCurrentId] = useState<number | null>(selectedId)
   const { data: leagues, isLoading, error } = useQuery({
     queryKey: ["leagues"],
     queryFn: () => useApi.get("/leagues"),
   })
 
+  useEffect(() => {
+    setCurrentId(selectedId ?? null)
+  }, [selectedId])
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = parseInt(e.target.value)
-    setSelectedId(id)
-    onLeagueSelect?.(id)
+    const id = e.target.value ? parseInt(e.target.value, 10) : null
+    setCurrentId(id)
+    if (id !== null) {
+      onLeagueSelect?.(id)
+    }
   }
 
   if (isLoading) return <div className="p-4 text-gray-500">Loading leagues...</div>
@@ -22,7 +33,7 @@ export default function LeagueSelect({ onLeagueSelect }: { onLeagueSelect?: (id:
     <div className="mb-6">
       <label className="block text-sm font-medium mb-2">Select League</label>
       <select
-        value={selectedId || ""}
+        value={currentId ?? ""}
         onChange={handleChange}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >

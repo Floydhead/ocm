@@ -1,18 +1,24 @@
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
-import { useState } from "react"
-import { useApi } from "../hooks/useApi"
+import { useEffect, useState } from "react"
 
-export default function DragDropSquad({ squad, onChange }) {
-  const [items, setItems] = useState(squad)
+export default function DragDropSquad({ squad, onChange, renderRow }) {
+  const [items, setItems] = useState(squad || [])
+
+  useEffect(() => {
+    setItems(squad || [])
+  }, [squad])
 
   const onDragEnd = async (result) => {
     if (!result.destination) return
+
     const newItems = Array.from(items)
     const [moved] = newItems.splice(result.source.index, 1)
     newItems.splice(result.destination.index, 0, moved)
+
     setItems(newItems)
-    // send PATCH for each changed squad_number
-    await onChange(newItems)
+    if (onChange) {
+      await onChange(newItems)
+    }
   }
 
   return (
@@ -20,15 +26,16 @@ export default function DragDropSquad({ squad, onChange }) {
       <Droppable droppableId="squad">
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
-            {items.map((p, index) => (
-              <Draggable key={p.id} draggableId={p.id.toString()} index={index}>
+            {items.map((item, index) => (
+              <Draggable key={item.id.toString()} draggableId={item.id.toString()} index={index}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    className="mb-3"
                   >
-                    {p.name}
+                    {renderRow ? renderRow(item, index) : <div>{item.player?.name ?? item.name}</div>}
                   </div>
                 )}
               </Draggable>

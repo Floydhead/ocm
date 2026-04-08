@@ -54,6 +54,10 @@ class TeamBase(BaseModel):
 class TeamCreate(TeamBase):
     pass
 
+class TeamUpdate(BaseModel):
+    name: Optional[str] = None
+    league_id: Optional[int] = None
+
 class TeamOut(TeamBase):
     id: int
 
@@ -79,6 +83,20 @@ class TeamPlayerBase(BaseModel):
 
 class TeamPlayerCreate(TeamPlayerBase):
     player_id: int
+
+class TeamPlayerAssign(BaseModel):
+    player_id: Optional[int] = None
+    player_name: Optional[str] = None
+    squad_number: Optional[int] = None
+
+class TeamPlayerUpdate(BaseModel):
+    player_id: Optional[int] = None
+    player_name: Optional[str] = None
+    squad_number: Optional[int] = None
+
+class TeamPlayerOrder(BaseModel):
+    id: int
+    squad_number: PositiveInt
 
 class TeamPlayerOut(TeamPlayerBase):
     id: int

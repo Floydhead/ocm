@@ -49,8 +49,14 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
 def require_role(required_role: str):
     """Dependency to require a specific role or admin."""
-    def role_checker(user: dict = Depends(get_current_user)):
-        if user["role"] not in [required_role, "admin"]:
+    def role_checker(user = Depends(get_current_user)):
+        role = None
+        if isinstance(user, dict):
+            role = user.get("role")
+        else:
+            role = getattr(user, "role", None)
+
+        if role not in [required_role, "admin"]:
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         return user
     return role_checker
